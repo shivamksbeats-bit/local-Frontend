@@ -163,9 +163,12 @@ const ColumnModal = () => {
    MAIN COMPONENT
 ---------------------------------------- */
 const AllVendors = () => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const initialSearch = queryParams.get("vendor_search") || "";
+
   const [vendor_status, setVendorStatus] = React.useState("");
   const [vendor_locality, setVendorLocality] = React.useState("");
-  const [searchValue, setSearchValue] = React.useState("");
+  const [searchValue, setSearchValue] = React.useState(initialSearch);
   const [vendors, setVendors] = React.useState([]);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const debounceRef = useRef(null);

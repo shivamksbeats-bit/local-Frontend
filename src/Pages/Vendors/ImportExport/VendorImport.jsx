@@ -196,7 +196,7 @@ const VendorImportIndex = () => {
                     if (result.isConfirmed) {
                         navigate("/vendor/vendors");
                     }
-                });
+                });  
 
             } else {
                 showErrorToast(res);
@@ -463,13 +463,12 @@ const VendorImportIndex = () => {
                                                     <tr key={idx}>
                                                         <td className="fw-bold">{row["Vendor Code"]}</td>
                                                         <td>{row["Vendor Name"]}</td>
-                                                        <td>{row["Company Name"]}</td>
-                                                        <td>{row["Vendor Type"] }</td>
+                                                        <td>{row["Vendor Type"]}</td>
                                                         <td>{row["Company Locality"] }</td>
                                                         <td>{row["City"] }</td>
-                                                        <td>{row[" Country"] }</td>
+                                                        <td>{row["Country"] }</td>
                                                         <td>{row["Currency"] }</td>
-                                                        <td>{row["Tax%"] }</td>
+                                                        <td>{row["Tax %"] }</td>
                                                         <td>{row["Status"] }</td>
                                                         <td>{row["Action"] }</td>
                                                     </tr>
