@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 
 const VendorImportIndex = () => {
     const navigate = useNavigate();
-    const [importType] = useState("vendor");
+    const [importType, setImportType] = useState("vendor");
     const [selectedFile, setSelectedFile] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
@@ -276,15 +276,17 @@ const VendorImportIndex = () => {
                 {/* Tabs below Stepper */}
                 <div className="d-flex justify-content-center gap-2 py-3  bg-white">
                     <Button
-                        variant="primary"
+                        variant={importType === 'vendor' ? 'primary' : 'outline-primary'}
                         className="px-3 shadow-sm"
+                        onClick={() => setImportType('vendor')}
                     >
                         Vendor Details
                     </Button>
 
                     <Button
-                        variant="outline-primary"
+                        variant={importType === 'contact' ? 'primary' : 'outline-primary'}
                         className="px-3 shadow-sm"
+                        onClick={() => setImportType('contact')}
                     >
                         Vendor Contacts
                     </Button>
@@ -365,10 +367,21 @@ const VendorImportIndex = () => {
 
                                         <div className="card-footer">
                                             <small className="text-muted d-block mb-2">
-                                                Duplicate detection rules:<br />
-                                                • Validation requires Vendor Code, Vendor Name, and Company Name.<br />
-                                                • Duplicate detection checks Vendor Code, Vendor Name, and Company Name.<br />
-                                                • If you choose update, related details like addresses, contacts, and bank records are refreshed from the file.
+                                                {importType === 'vendor' ? (
+                                                    <>
+                                                        Duplicate detection rules:<br />
+                                                        • Validation requires Vendor Code, Vendor Name, and Company Name.<br />
+                                                        • Duplicate detection checks Vendor Code, Vendor Name, and Company Name.<br />
+                                                        • If you choose update, related details like addresses, contacts, and bank records are refreshed from the file.
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Duplicate detection rules for contacts:<br />
+                                                        • Validation requires Vendor Code and Email.<br />
+                                                        • Duplicate detection checks Vendor Code and Email.<br />
+                                                        • If you choose update, matching contact details are refreshed from the file.
+                                                    </>
+                                                )}
                                             </small>
                                         </div>
                                     </div>
@@ -383,7 +396,7 @@ const VendorImportIndex = () => {
                                 <Dropdown as={ButtonGroup} size="sm">
                                     <Button variant="link" className="text-decoration-none text-dark fw-bold p-0" disabled={isDownloading}>
                                         <FontAwesomeIcon icon={faDownload} className="me-1 text-success" />
-                                        Get Vendor Template
+                                        Get {importType === 'contact' ? 'Contact' : 'Vendor'} Template
                                     </Button>
                                     <Dropdown.Toggle split variant="link" className="text-success p-0 ms-2" id="dropdown-split-basic" />
                                     <Dropdown.Menu className="shadow border-0 small">
@@ -409,23 +422,47 @@ const VendorImportIndex = () => {
                                     <h6 className="fw-bold mb-3"><FontAwesomeIcon icon={faCheckCircle} className="text-success me-2" /> Preview (Top Records)</h6>
                                     <Table responsive bordered size="sm" className="small align-middle">
                                         <thead className="table-light text-uppercase" style={{ fontSize: "11px" }}>
-                                            <tr>
-                                                <th>Vendor Code</th>
-                                                <th>Vendor Name</th>
-                                                <th>Company Name</th>
-                                                <th>Payment Term</th>
-                                                <th>Status</th>
-                                            </tr>
+                                            {importType === 'contact' ? (
+                                                <tr>
+                                                    <th>Vendor Code</th>
+                                                    <th>First Name</th>
+                                                    <th>Last Name</th>
+                                                    <th>Department</th>
+                                                    <th>Email</th>
+                                                    <th>Phone</th>
+                                                    <th>Description</th>
+                                                </tr>
+                                            ) : (
+                                                <tr>
+                                                    <th>Vendor Code</th>
+                                                    <th>Vendor Name</th>
+                                                    <th>Company Name</th>
+                                                    <th>Payment Term</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            )}
                                         </thead>
                                         <tbody>
                                             {importSummary.preview_data.map((row, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="fw-bold">{row["Vendor Code"]}</td>
-                                                    <td>{row["Vendor Name"]}</td>
-                                                    <td>{row["Company Name"]}</td>
-                                                    <td>{row["Payment Term"] || "-"}</td>
-                                                    <td>{row["Status"] || "Pending"}</td>
-                                                </tr>
+                                                importType === 'contact' ? (
+                                                    <tr key={idx}>
+                                                        <td className="fw-bold">{row["Vendor Code"]}</td>
+                                                        <td>{row["First Name"] || "-"}</td>
+                                                        <td>{row["Last Name"] || "-"}</td>
+                                                        <td>{row["Department"] || "-"}</td>
+                                                        <td>{row["Email"] || "-"}</td>
+                                                        <td>{row["Phone"] || "-"}</td>
+                                                        <td>{row["Description"] || "-"}</td>
+                                                    </tr>
+                                                ) : (
+                                                    <tr key={idx}>
+                                                        <td className="fw-bold">{row["Vendor Code"]}</td>
+                                                        <td>{row["Vendor Name"]}</td>
+                                                        <td>{row["Company Name"]}</td>
+                                                        <td>{row["Payment Term"] || "-"}</td>
+                                                        <td>{row["Status"] || "Pending"}</td>
+                                                    </tr>
+                                                )
                                             ))}
                                         </tbody>
                                     </Table>
