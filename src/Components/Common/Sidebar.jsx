@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import apiFetch from "../../Utils/apiFetch";
 import { API_BASE } from "../../Config/api";
+import { useAuth } from "../../Context/AuthContext";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = Boolean(user?.is_superuser);
   const [openMenu, setOpenMenu] = useState(null);
   const [openGroup, setOpenGroup] = useState(null); // Purchases group-ku
 
@@ -406,7 +409,7 @@ export default function Sidebar() {
             {/* Settings Treeview */}
             <li className={`nav-item has-treeview ${openMenu === "settings" ? "menu-open" : ""}`}>
               <a
-                className={`nav-link ${location.pathname.includes("countries") || location.pathname.includes("payment_terms") || location.pathname.includes("warehouses") || location.pathname.includes("shipping_providers") ? "active" : ""}`}
+                className={`nav-link ${location.pathname.includes("countries") || location.pathname.includes("payment_terms") || location.pathname.includes("warehouses") || location.pathname.includes("shipping_providers") || location.pathname.includes("vendor_login_credentials") ? "active" : ""}`}
                 onClick={() => toggleMenu("settings")}
                 style={{ cursor: 'pointer' }}
               >
@@ -442,6 +445,17 @@ export default function Sidebar() {
                     <p>Shipping Providers</p>
                   </Link>
                 </li>
+                {isSuperAdmin && (
+                  <li className="nav-item">
+                    <Link
+                      to="/settings/vendor_login_credentials"
+                      className={`nav-link ${isActive("/settings/vendor_login_credentials") ? "active" : ""}`}
+                    >
+                      <i className={`${isActive("/settings/vendor_login_credentials") ? "fas" : "far"} fa-circle nav-icon`}></i>
+                      <p>Vendor Login Credentials</p>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </li>
 

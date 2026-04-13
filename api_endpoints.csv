@@ -18,7 +18,7 @@ api/vendor/contact/addNew/${vendorId}
 api/vendor/api/vendor_warehouse/get_all/${vendorId}
 api/vendor/api/vendor_warehouse/addNew/${vendorId}
 api/vendor/api/vendor_warehouse/update/${warehouse_id}
-api/vendor/api/vendor_warehouse/delete/${warehouseId}/${vendorId}
+api/vendor/vendor_warehouse/delete/${vendorId}/${warehouseId}
 api/product/api/allproducts
 api/product/create
 api/product/details/${productId}/

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Tabs, Tab, Table, Spinner, Dropdown, ButtonGroup, Row, Col } from 'react-bootstrap';
+import { Button, Table, Spinner, Dropdown, ButtonGroup, Row, Col } from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
 import { toast } from "react-hot-toast";
 import { API_BASE } from "../../../Config/api";
@@ -16,8 +16,7 @@ import Swal from "sweetalert2";
 
 const VendorImportIndex = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState("import");
-    const [importType, setImportType] = useState("vendor"); 
+    const [importType] = useState("vendor");
     const [selectedFile, setSelectedFile] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
@@ -34,16 +33,14 @@ const VendorImportIndex = () => {
         errors: []
     });
 
-    const handleExportVendors = async (fileType, format) => {
+    const handleExportVendors = async (format) => {
         setIsDownloading(true);
         try {
-            // Query string path-lae GET request anupalam
-            const res = await apiFetch(`${API_BASE}api/vendor/api/export-vendors?file_type=${fileType}&file_format=${format}`, {
-                method: 'GET', // Neenga sonna maathiri GET thaan correct
-                responseType: 'blob' // Ippo apiFetch-la intha argument work aagum
+            const res = await apiFetch(`${API_BASE}api/vendor/api/export-vendors?file_type=vendor&file_format=${format}`, {
+                method: 'GET',
+                responseType: 'blob'
             });
 
-            // Axios blob response-la data direct-ah res.data-la irukkum
             const blob = new Blob([res.data], { 
                 type: res.headers['content-type'] || (format === 'xl' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv')
             });
@@ -52,13 +49,12 @@ const VendorImportIndex = () => {
             const a = document.createElement('a');
             a.href = url;
             const ext = format === 'xl' ? 'xlsx' : 'csv';
-            a.download = `${fileType}_template.${ext}`;
+            a.download = `vendor_export.${ext}`;
             document.body.appendChild(a);
             a.click();
-            // Memory cleanup
             a.remove();
             window.URL.revokeObjectURL(url);
-            toast.success("Template downloaded!",{
+            toast.success("Vendor data exported!",{
                 position: "bottom-center",
             });
         } catch (err) {
@@ -75,13 +71,11 @@ const VendorImportIndex = () => {
     const handleDownloadTemplate = async (fileType, format) => {
         setIsDownloading(true);
         try {
-            // Query string path-lae GET request anupalam
             const res = await apiFetch(`${API_BASE}api/vendor/api/download-template?file_type=${fileType}&file_format=${format}`, {
-                method: 'GET', // Neenga sonna maathiri GET thaan correct
-                responseType: 'blob' // Ippo apiFetch-la intha argument work aagum
+                method: 'GET',
+                responseType: 'blob'
             });
 
-            // Axios blob response-la data direct-ah res.data-la irukkum
             const blob = new Blob([res.data], { 
                 type: res.headers['content-type'] || (format === 'xl' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv')
             });
@@ -93,7 +87,6 @@ const VendorImportIndex = () => {
             a.download = `${fileType}_template.${ext}`;
             document.body.appendChild(a);
             a.click();
-            // Memory cleanup
             a.remove();
             window.URL.revokeObjectURL(url);
             toast.success("Template downloaded!",{
@@ -139,62 +132,31 @@ const VendorImportIndex = () => {
                 body: formData,
                 isFormData: true 
             });
-            let resp = res;
-            if (typeof res === "string") {
-                try {
-                    resp = JSON.parse(res);
-                } catch (parseErr) {
-                    console.log("Error parsing response:", parseErr);
-                    return;
-                }
-            }
-      
-            if (resp.status) {
-                setImportSummary(resp.data);
+            if (res.status) {
+                setImportSummary(res.data);
                 setStep(2);
                 toast.success("Validation complete. Please review records.");
-            } else {
-                let errorHtml = "";
-
-                if (Array.isArray(res.errors) && res.errors.length > 0) {
-                    errorHtml = `
-                        <p style="margin-bottom:10px; font-weight:500;">
-                            Please correct the errors listed below and upload the file again.
-                        </p>
-
-                        <div style="max-height:300px; overflow:auto; text-align:left;">
-                            <ul style="padding-left:18px; margin:0;">
-                                ${res.errors.map(err => `
-                                    <li>
-                                        <b>Row ${err.row}</b> –
-                                        <b>${err.column}</b>: ${err.message}
-                                    </li>
-                                `).join("")}
-                            </ul>
-                        </div>
-                    `;
-                } else {
-                    errorHtml = `
-                        <p>
-                            ${res.message || "The uploaded file failed validation."}
-                        </p>
-                        <p>Please correct the errors and upload the file again.</p>
-                    `;
-                }
-
+            }
+        } catch (err) {
+            if (err?.data?.errors?.length) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Validation Failed',
-                    html: errorHtml,
+                    html: `
+                        <div style="max-height:300px; overflow:auto; text-align:left;">
+                            <ul style="padding-left:18px; margin:0;">
+                                ${err.data.errors.map(item => `
+                                    <li><b>Row ${item.row}</b> - <b>${item.column}</b>: ${item.message}</li>
+                                `).join("")}
+                            </ul>
+                        </div>
+                    `,
                     width: 700,
                     confirmButtonText: 'OK'
                 });
-
-                return;
-           
+            } else {
+                showErrorToast(err);
             }
-        } catch (err) {
-            showErrorToast("Connection error during validation");
         } finally {
             setProcessing(false);
         }
@@ -277,17 +239,17 @@ const VendorImportIndex = () => {
                                 <li>
                                 <button 
                                     className="dropdown-item" 
-                                    onClick={() => handleExportVendors('vendor', 'csv')}
+                                    onClick={() => handleExportVendors('csv')}
                                 >
-                                    Export Vendors (CSV)
+                                    Export Vendor Data (CSV)
                                 </button>
                                 </li>
                                 <li>
                                 <button 
                                     className="dropdown-item" 
-                                    onClick={() => handleExportVendors('contact', 'csv')}
+                                    onClick={() => handleExportVendors('xl')}
                                 >
-                                    Export Vendor Contacts (CSV)
+                                    Export Vendor Data (Excel)
                                 </button>
                                 </li>
                             </ul>
@@ -315,12 +277,6 @@ const VendorImportIndex = () => {
                     {step === 1 ? (
                         /* STAGE 1: UPLOAD */
                         <div className="animate__animated animate__fadeIn">
-                            <div className="text-center mb-4">
-                                <div className="btn-group shadow-sm">
-                                    <Button variant={importType === 'vendor' ? "primary" : "outline-primary"} onClick={() => setImportType('vendor')} size="sm">Vendor Details</Button>
-                                    <Button variant={importType === 'contact' ? "primary" : "outline-primary"} onClick={() => setImportType('contact')} size="sm">Vendor Contacts</Button>
-                                </div>
-                            </div>
                             <Row className="mb-3">
                                 <Col md="6">
                                     <div {...getRootProps()} className={`mt-3 border rounded-3 p-5  text-center transition-all ${isDragActive ? 'bg-primary-subtle border-primary' : 'bg-light border-dashed'}`} style={{ cursor: 'pointer', border: '2px dashed #dee2e6' }}>
@@ -355,7 +311,7 @@ const VendorImportIndex = () => {
                                             </div>
 
                                             <div className="card-body pt-3 ps-3 pb-0">
-                                                <p>
+                                                <div className="mb-3">
                                                    <div className="form-check icheck-primary d-inline">
                                             <input
                                             className="form-check-input"
@@ -370,8 +326,8 @@ const VendorImportIndex = () => {
                                             Skip duplicate records
                                             </label>
                                         </div>
-                                        </p>
-                                        <p>
+                                        </div>
+                                        <div className="mb-3">
                                         <div className="form-check icheck-primary d-inline">
                                             <input
                                             className="form-check-input"
@@ -385,15 +341,16 @@ const VendorImportIndex = () => {
                                             <label className="form-check-label" htmlFor="update_duplicates">
                                             Update duplicate records
                                             </label>
-                                        </div></p>
+                                        </div></div>
 
                                             </div>
 
                                         <div className="card-footer">
                                             <small className="text-muted d-block mb-2">
                                                 Duplicate detection rules:<br/>
-                                                • Vendor Import: Vendor Code and Vendor Name are considered for duplicate identification.<br/>
-                                                • Vendor Contact Import: Email is considered as the unique key for contact records.
+                                                • Validation requires Vendor Code, Vendor Name, and Company Name.<br/>
+                                                • Duplicate detection checks Vendor Code, Vendor Name, and Company Name.<br/>
+                                                • If you choose update, related details like addresses, contacts, and bank records are refreshed from the file.
                                             </small>
                                         </div>
                                     </div>
@@ -408,7 +365,7 @@ const VendorImportIndex = () => {
                                 <Dropdown as={ButtonGroup} size="sm">
                                     <Button variant="link" className="text-decoration-none text-dark fw-bold p-0" disabled={isDownloading}>
                                         <FontAwesomeIcon icon={faDownload} className="me-1 text-success" /> 
-                                        Get {importType === 'vendor' ? 'Vendor' : 'Contact'} Template
+                                        Get Vendor Template
                                     </Button>
                                     <Dropdown.Toggle split variant="link" className="text-success p-0 ms-2" id="dropdown-split-basic" />
                                     <Dropdown.Menu className="shadow border-0 small">
@@ -434,46 +391,24 @@ const VendorImportIndex = () => {
                                     <h6 className="fw-bold mb-3"><FontAwesomeIcon icon={faCheckCircle} className="text-success me-2"/> Preview (Top Records)</h6>
                                     <Table responsive bordered size="sm" className="small align-middle">
                                         <thead className="table-light text-uppercase" style={{ fontSize: "11px" }}>
-                                            {importType === "vendor" ? (
                                             <tr>
                                                 <th>Vendor Code</th>
                                                 <th>Vendor Name</th>
-                                                <th>Currency</th>
-                                                <th>GST No</th>
+                                                <th>Company Name</th>
+                                                <th>Payment Term</th>
+                                                <th>Status</th>
                                             </tr>
-                                            ) : (
-                                            <tr>
-                                                <th>Vendor Code</th>
-                                                <th>First Name</th>
-                                                <th>Last Name</th>
-                                                <th>Department</th>
-                                                <th>Email</th>
-                                                <th>Phone</th>
-                                                <th>Description</th>
-                                            </tr>
-                                            )}
                                         </thead>
                                         <tbody>
-                                            {importSummary.preview_data.map((row, idx) =>
-                                            importType === "vendor" ? (
+                                            {importSummary.preview_data.map((row, idx) => (
                                                 <tr key={idx}>
-                                                <td className="fw-bold">{row["Vendor Code"]}</td>
-                                                <td>{row["Vendor Name"]}</td>
-                                                <td>{row["Currency Code"]}</td>
-                                                <td>{row["GST Number"]}</td>
+                                                    <td className="fw-bold">{row["Vendor Code"]}</td>
+                                                    <td>{row["Vendor Name"]}</td>
+                                                    <td>{row["Company Name"]}</td>
+                                                    <td>{row["Payment Term"] || "-"}</td>
+                                                    <td>{row["Status"] || "Pending"}</td>
                                                 </tr>
-                                            ) : (
-                                                <tr key={idx}>
-                                                <td className="fw-bold">{row["Vendor Code"]}</td>
-                                                <td>{row["First Name"]}</td>
-                                                <td>{row["Last Name"]}</td>
-                                                <td>{row["Department"]}</td>
-                                                <td>{row["Email"]}</td>
-                                                <td>{row["Phone"]}</td>
-                                                <td>{row["Description"]}</td>
-                                                </tr>
-                                            )
-                                            )}
+                                            ))}
                                         </tbody>
                                     </Table>
                                 </div>

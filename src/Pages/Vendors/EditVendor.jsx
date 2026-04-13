@@ -100,6 +100,19 @@ const EditVendor = () => {
 
     const [contacts, setContacts] = useState([]);
     const [showContactModal, setShowContactModal] = useState(false);
+    const [inventoryRows, setInventoryRows] = useState([]);
+    const [inventoryMaster, setInventoryMaster] = useState({});
+    const [showInventoryModal, setShowInventoryModal] = useState(false);
+    const [tempInventory, setTempInventory] = useState({
+        id: null,
+        inventory_frequency_id: "",
+        inventory_source_id: "",
+        product_inventory_sync_id: "",
+        invoice_received_on_id: "",
+        tracking_received_on_id: "",
+        po_integration_type_id: "",
+        integration_weblink: "",
+    });
     const [showWarehouseModal, setShowWarehouseModal] = useState(false);
     const [warehouseStates, setWarehouseStates] = useState([]);
     const zipRegex = /^[A-Za-z0-9\-\s]{3,12}$/;
@@ -200,6 +213,103 @@ const EditVendor = () => {
     }, [vendorId]);
 
     useEffect(() => { if (vendorId) fetchContacts(); }, [vendorId, fetchContacts]);
+
+    const fetchInventoryMaster = useCallback(async () => {
+        try {
+            const res = await apiFetch(`${API_BASE}api/vendor/inventory/master-options`);
+            if (res.status) setInventoryMaster(res.data || {});
+        } catch (err) { console.error("inventory master fetch", err); }
+    }, []);
+
+    const fetchInventoryRows = useCallback(async () => {
+        if (!vendorId) return;
+        try {
+            const res = await apiFetch(`${API_BASE}api/vendor/inventory/getall/${vendorId}`);
+            if (res.status) setInventoryRows(res.data || []);
+        } catch (err) { console.error("inventory rows fetch", err); }
+    }, [vendorId]);
+
+    useEffect(() => { fetchInventoryMaster(); }, [fetchInventoryMaster]);
+    useEffect(() => { if (vendorId) fetchInventoryRows(); }, [vendorId, fetchInventoryRows]);
+
+    const handleSaveInventory = async () => {
+        const link = String(tempInventory.integration_weblink || "").trim();
+        if (link) {
+            try {
+                const u = new URL(link);
+                if (u.protocol !== "http:" && u.protocol !== "https:") {
+                    toast.error("Weblink must use http or https only");
+                    return;
+                }
+            } catch {
+                toast.error("Enter a valid weblink (for example https://example.com/feed)");
+                return;
+            }
+        }
+        const numOrNull = (v) => (v === "" || v === null || v === undefined ? null : Number(v));
+        const payload = {
+            inventory_frequency_id: numOrNull(tempInventory.inventory_frequency_id),
+            inventory_source_id: numOrNull(tempInventory.inventory_source_id),
+            product_inventory_sync_id: numOrNull(tempInventory.product_inventory_sync_id),
+            invoice_received_on_id: numOrNull(tempInventory.invoice_received_on_id),
+            tracking_received_on_id: numOrNull(tempInventory.tracking_received_on_id),
+            po_integration_type_id: numOrNull(tempInventory.po_integration_type_id),
+            integration_weblink: link || null,
+        };
+        const isEdit = !!tempInventory.id;
+        const url = isEdit
+            ? `${API_BASE}api/vendor/inventory/update/${tempInventory.id}`
+            : `${API_BASE}api/vendor/inventory/addNew/${vendorId}`;
+        try {
+            const res = await apiFetch(url, { method: "POST", body: JSON.stringify(payload) });
+            if (res.status) {
+                toast.success(isEdit ? "Inventory row updated" : "Inventory row added");
+                setShowInventoryModal(false);
+                fetchInventoryRows();
+                return;
+            }
+            toast.error(res?.message || "Save failed");
+        } catch (err) {
+            const d = err?.data;
+            const flat = d?.errors && Object.values(d.errors).flat();
+            const first = flat && flat.length ? (typeof flat[0] === "string" ? flat[0] : String(flat[0])) : null;
+            toast.error(first || d?.message || err?.message || "Save failed");
+        }
+    };
+
+    const handleDeleteInventory = async (rowId) => {
+        const result = await Swal.fire({
+            title: "Delete this row?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Delete",
+        });
+        if (!result.isConfirmed) return;
+        try {
+            const res = await apiFetch(`${API_BASE}api/vendor/inventory/delete/${rowId}/${vendorId}`, { method: "POST", body: JSON.stringify({}) });
+            if (res.status) {
+                toast.success("Removed");
+                fetchInventoryRows();
+            } else toast.error(res?.message || "Delete failed");
+        } catch (err) { toast.error("Delete failed"); }
+    };
+
+    const renderInventorySelect = (fieldKey, listType, label) => (
+        <Form.Group className="mb-3" key={fieldKey}>
+            <Form.Label className="small fw-bold">{label}</Form.Label>
+            <Form.Select
+                size="sm"
+                value={tempInventory[fieldKey] === null || tempInventory[fieldKey] === undefined ? "" : String(tempInventory[fieldKey])}
+                onChange={(e) => setTempInventory({ ...tempInventory, [fieldKey]: e.target.value })}
+            >
+                <option value="">Select</option>
+                {(inventoryMaster[listType] || []).map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+            </Form.Select>
+        </Form.Group>
+    );
 
     const handleSaveContact = async () => {
         const isEdit = !!tempContact.id;
@@ -338,7 +448,10 @@ const EditVendor = () => {
         const result = await Swal.fire({ title: 'Delete Location?', text: "Are you sure?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, delete it!' });
         if (result.isConfirmed) {
             try {
-                const res = await apiFetch(`${API_BASE}api/vendor/api/vendor_warehouse/delete/${warehouseId}/${vendorId}`, { method: "DELETE" });
+                const res = await apiFetch(
+                    `${API_BASE}api/vendor/vendor_warehouse/delete/${vendorId}/${warehouseId}`,
+                    { method: "DELETE" }
+                  );
                 if (res.status) {
                     toast.success("Vendor detail removed");
                     fetchWarehouses();
@@ -738,6 +851,101 @@ const EditVendor = () => {
                             </div>
                         </Tab>
 
+                        <Tab eventKey="inventory" title="Inventory Section">
+                            <div className="py-0 px-3 pb-1">
+                                <Button
+                                    variant="link"
+                                    className="p-0 text-decoration-none mb-3 float-right small"
+                                    onClick={() => {
+                                        setTempInventory({
+                                            id: null,
+                                            inventory_frequency_id: "",
+                                            inventory_source_id: "",
+                                            product_inventory_sync_id: "",
+                                            invoice_received_on_id: "",
+                                            tracking_received_on_id: "",
+                                            po_integration_type_id: "",
+                                            integration_weblink: "",
+                                        });
+                                        setShowInventoryModal(true);
+                                    }}
+                                >
+                                    <i className="fas fa-plus-circle me-1"></i> Add Inventory Row
+                                </Button>
+                                <Table size="sm" bordered hover className="text-center align-middle" style={{ fontSize: "13px" }}>
+                                    <thead className="table-light text-muted">
+                                        <tr>
+                                            <th>FREQUENCY</th>
+                                            <th>SOURCE</th>
+                                            <th>PRODUCT SYNC</th>
+                                            <th>INVOICE ON</th>
+                                            <th>TRACKING ON</th>
+                                            <th>PO INTEGRATION</th>
+                                            <th>WEBLINK</th>
+                                            <th style={{ width: "100px" }}>ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {inventoryRows.length > 0 ? inventoryRows.map((r) => (
+                                            <tr key={r.id}>
+                                                <td>{r.inventory_frequency?.label || "—"}</td>
+                                                <td>{r.inventory_source?.label || "—"}</td>
+                                                <td>{r.product_inventory_sync?.label || "—"}</td>
+                                                <td>{r.invoice_received_on?.label || "—"}</td>
+                                                <td>{r.tracking_received_on?.label || "—"}</td>
+                                                <td>{r.po_integration_type?.label || "—"}</td>
+                                                <td className="text-start">
+                                                    {r.integration_weblink ? (
+                                                        <a
+                                                            href={r.integration_weblink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-primary text-truncate d-inline-block"
+                                                            style={{ maxWidth: "140px" }}
+                                                            title={r.integration_weblink}
+                                                        >
+                                                            Open link
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-muted">—</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <div className="btn-group">
+                                                        <Button
+                                                            variant="link"
+                                                            size="sm"
+                                                            className="text-success p-0 me-2"
+                                                            onClick={() => {
+                                                                setTempInventory({
+                                                                    id: r.id,
+                                                                    inventory_frequency_id: r.inventory_frequency?.id ?? "",
+                                                                    inventory_source_id: r.inventory_source?.id ?? "",
+                                                                    product_inventory_sync_id: r.product_inventory_sync?.id ?? "",
+                                                                    invoice_received_on_id: r.invoice_received_on?.id ?? "",
+                                                                    tracking_received_on_id: r.tracking_received_on?.id ?? "",
+                                                                    po_integration_type_id: r.po_integration_type?.id ?? "",
+                                                                    integration_weblink: r.integration_weblink || "",
+                                                                });
+                                                                setShowInventoryModal(true);
+                                                            }}
+                                                        >
+                                                            <i className="fas fa-pen"></i>
+                                                        </Button>
+                                                        <Button variant="link" size="sm" className="text-danger p-0" onClick={() => handleDeleteInventory(r.id)}>
+                                                            <i className="fas fa-trash"></i>
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan="8" className="py-4 text-muted">No inventory rows yet</td></tr>
+                                        )}
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </Tab>
+
                         <Tab eventKey="other" title="Documents">
                             <div className="ps-3 pe-3 pb-2">
                                 <Row className="mb-4 align-items-end">
@@ -801,6 +1009,46 @@ const EditVendor = () => {
                     .vendor-disabled-tab { opacity: 0.5; cursor: not-allowed !important; pointer-events: all !important; }
                     .vendor-disabled-tab:hover { opacity: 0.6; }
                 `}</style>
+
+                {/* Inventory Section Modal */}
+                <Modal show={showInventoryModal} onHide={() => setShowInventoryModal(false)} centered size="lg">
+                    <Modal.Header closeButton>
+                        <Modal.Title className="h6 fw-bold">{tempInventory.id ? "Edit Inventory Row" : "Add Inventory Row"}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="px-4">
+                        <Row className="mb-1">
+                            <Col md={6}>
+                                {renderInventorySelect("inventory_frequency_id", "inventory_frequency", "Inventory Frequency")}
+                                {renderInventorySelect("inventory_source_id", "inventory_source", "Inventory Source")}
+                                {renderInventorySelect("product_inventory_sync_id", "product_inventory_sync", "Product Inventory Sync")}
+                            </Col>
+                            <Col md={6}>
+                                {renderInventorySelect("invoice_received_on_id", "invoice_received_on", "Invoice Received On")}
+                                {renderInventorySelect("tracking_received_on_id", "tracking_received_on", "Tracking Received On")}
+                                {renderInventorySelect("po_integration_type_id", "po_integration_type", "PO Integration Type")}
+                            </Col>
+                        </Row>
+                        <Form.Group className="mb-0">
+                            <Form.Label className="small fw-bold">Integration weblink</Form.Label>
+                            <Form.Control
+                                size="sm"
+                                type="url"
+                                inputMode="url"
+                                autoComplete="off"
+                                placeholder="https://"
+                                value={tempInventory.integration_weblink}
+                                onChange={(e) => setTempInventory({ ...tempInventory, integration_weblink: e.target.value })}
+                            />
+                            <Form.Text className="text-muted">
+                                Optional portal or feed URL (http or https only). The table opens links in a new tab with noopener and noreferrer.
+                            </Form.Text>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" size="sm" onClick={() => setShowInventoryModal(false)}>Cancel</Button>
+                        <Button variant="primary" size="sm" onClick={handleSaveInventory}>Save</Button>
+                    </Modal.Footer>
+                </Modal>
 
                 {/* Contact Modal */}
                 <Modal show={showContactModal} onHide={() => setShowContactModal(false)} centered size="lg">

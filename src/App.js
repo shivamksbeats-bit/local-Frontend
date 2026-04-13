@@ -54,6 +54,7 @@ const UserManagement = lazy(() =>  import("./Pages/Security/Users/UserManagement
 const ManageUserRoles = lazy(() =>  import("./Pages/Security/Roles/ManageUserRoles"));
 const InventoryWarehouseList = lazy(() =>  import("./Pages/Settings/Warehouse/InventoryWarehouseList"));
 const ShippingProvidersList = lazy(() =>  import("./Pages/Settings/ShippingProviders/ShippingProvidersList"));
+const VendorLoginCredentialsList = lazy(() =>  import("./Pages/Settings/VendorLoginCredentials/VendorLoginCredentialsList"));
 const PaymentTermsList = lazy(() =>  import("./Pages/Settings/PaymentTerms/PaymentTermsList"));
 const CountriesList = lazy(() =>  import("./Pages/Countries/CountriesList"));
 const CountryEditView = lazy(() =>  import("./Pages/Countries/CountryEditView"));
@@ -277,6 +278,7 @@ const routes = [
 
   { path: "/settings/warehouses", component: <InventoryWarehouseList />, title: "SB Admin | Warehouses", layout: true, protected: true },
   { path: "/settings/shipping_providers", component: <ShippingProvidersList />, title: "SB Admin | Shipping Providers", layout: true, protected: true },
+  { path: "/settings/vendor_login_credentials", component: <VendorLoginCredentialsList />, title: "SB Admin | Vendor Login Credentials", layout: true, protected: true },
   { path: "/settings/payment_terms", component: <PaymentTermsList />, title: "SB Admin | Payment Terms", layout: true, protected: true },
   { path: "/settings/countries", component: <CountriesList />, title: "SB Admin | Countries", layout: true, protected: true },
   { path: "/settings/countries/:countryId/edit", component: <CountryEditView />, title: "SB Admin | Edit Country", layout: true, protected: true },
