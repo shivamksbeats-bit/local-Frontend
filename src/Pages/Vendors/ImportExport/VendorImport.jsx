@@ -436,9 +436,14 @@ const VendorImportIndex = () => {
                                                 <tr>
                                                     <th>Vendor Code</th>
                                                     <th>Vendor Name</th>
-                                                    <th>Company Name</th>
-                                                    <th>Payment Term</th>
+                                                    <th>Vendor Type</th>
+                                                    <th>Company Locality</th>
+                                                    <th>City</th>
+                                                    <th>Country</th>
+                                                    <th>Currency</th>
+                                                    <th>Tax%</th>
                                                     <th>Status</th>
+                                                    <th>Action</th>
                                                 </tr>
                                             )}
                                         </thead>
@@ -459,8 +464,14 @@ const VendorImportIndex = () => {
                                                         <td className="fw-bold">{row["Vendor Code"]}</td>
                                                         <td>{row["Vendor Name"]}</td>
                                                         <td>{row["Company Name"]}</td>
-                                                        <td>{row["Payment Term"] || "-"}</td>
-                                                        <td>{row["Status"] || "Pending"}</td>
+                                                        <td>{row["Vendor Type"] }</td>
+                                                        <td>{row["Company Locality"] }</td>
+                                                        <td>{row["City"] }</td>
+                                                        <td>{row[" Country"] }</td>
+                                                        <td>{row["Currency"] }</td>
+                                                        <td>{row["Tax%"] }</td>
+                                                        <td>{row["Status"] }</td>
+                                                        <td>{row["Action"] }</td>
                                                     </tr>
                                                 )
                                             ))}
