@@ -1,12 +1,12 @@
-import React, { useEffect , Suspense, lazy } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 import "./Assets/dist/css/adminlte.min.css";
 import ROCKET_LOADER from "./Assets/dist/img/loading_rocket.gif";
-import "./Assets/dist/css/app-custom.css"; 
-import "./Assets/dist/css/erp-theme.css"; 
+import "./Assets/dist/css/app-custom.css";
+import "./Assets/dist/css/erp-theme.css";
 
 
 import "./Assets/plugins/icheck-bootstrap.min.css";
@@ -22,80 +22,80 @@ import Header from "./Components/Common/Topbar";
 import SideMenu from "./Components/Common/Sidebar";
 import Footer from "./Components/Common/Footer";
 
-import { Toaster  } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 // Pages
 import LoginPage from "./Pages/LoginPage";
 import PendingInvoiceList from "./Pages/PurchaseOrder/Invoices/PendingInvoiceList";
-const BlankPage  = lazy(() => import("./Pages/BlankPage"));
+const BlankPage = lazy(() => import("./Pages/BlankPage"));
 const Dashboard = lazy(() => import("./Pages/Dashboard"));
-const PurchaseOrderList = lazy(() =>  import("./Pages/PurchaseOrder/PurchaseOrderList"));
-const PurchaseOrderForm = lazy(() =>  import("./Pages/PurchaseOrder/PurchaseOrderForm"));
-const PurchaseOrderView = lazy(() =>  import("./Pages/PurchaseOrder/PurchaseOrderView"));
-const PurchaseReceiveEdit = lazy(() =>  import("./Components/PO/Receive/PurchaseReceiveForm"));
-const PurchaseTrackStatusList = lazy(() =>  import("./Components/PO/PurchaseTrackStatusList"));
-const PurchaseInvoiceList = lazy(() =>  import("./Components/PO/PurchaseInvoiceList"));
-const AllVendors = lazy(() =>  import("./Pages/Vendors/AllVendors"));
-const AddNewVendor = lazy(() =>  import("./Pages/Vendors/AddNewVendor"));
-const EditVendor = lazy(() =>  import("./Pages/Vendors/EditVendor"));
+const PurchaseOrderList = lazy(() => import("./Pages/PurchaseOrder/PurchaseOrderList"));
+const PurchaseOrderForm = lazy(() => import("./Pages/PurchaseOrder/PurchaseOrderForm"));
+const PurchaseOrderView = lazy(() => import("./Pages/PurchaseOrder/PurchaseOrderView"));
+const PurchaseReceiveEdit = lazy(() => import("./Components/PO/Receive/PurchaseReceiveForm"));
+const PurchaseTrackStatusList = lazy(() => import("./Components/PO/PurchaseTrackStatusList"));
+const PurchaseInvoiceList = lazy(() => import("./Components/PO/PurchaseInvoiceList"));
+const AllVendors = lazy(() => import("./Pages/Vendors/AllVendors"));
+const AddNewVendor = lazy(() => import("./Pages/Vendors/AddNewVendor"));
+const EditVendor = lazy(() => import("./Pages/Vendors/EditVendor"));
 //import EditVendor from "./pages/Vendors/Edit/EditVendor";
 
-const ProductsList = lazy(() =>  import("./Pages/Products/ProductsList"));
-const CreateProduct = lazy(() =>  import("./Pages/Products/CreateProduct"));
-const EditProduct = lazy(() =>  import("./Pages/Products/EditProduct"));
-const BrandManagement = lazy(() =>  import("./Pages/Brands/BrandManagement"));
-const ManufacturerManagement = lazy(() =>  import("./Pages/Manufacturers/ManufacturerManagement"));
-const CategoryManagement = lazy(() =>  import("./Pages/Category/CategoryManagement"));
-const UnitOfMeasurement = lazy(() =>  import("./Pages/UnitOfMeasurement/UnitOfMeasurement"));
-const AttributeManagement = lazy(() =>  import("./Pages/Attributes/AttributeManagement"));
-const UserManagement = lazy(() =>  import("./Pages/Security/Users/UserManagement"));
-const ManageUserRoles = lazy(() =>  import("./Pages/Security/Roles/ManageUserRoles"));
-const InventoryWarehouseList = lazy(() =>  import("./Pages/Settings/Warehouse/InventoryWarehouseList"));
-const ShippingProvidersList = lazy(() =>  import("./Pages/Settings/ShippingProviders/ShippingProvidersList"));
-const VendorLoginCredentialsList = lazy(() =>  import("./Pages/Settings/VendorLoginCredentials/VendorLoginCredentialsList"));
-const PaymentTermsList = lazy(() =>  import("./Pages/Settings/PaymentTerms/PaymentTermsList"));
-const CountriesList = lazy(() =>  import("./Pages/Countries/CountriesList"));
-const CountryEditView = lazy(() =>  import("./Pages/Countries/CountryEditView"));
-const OrganizationProfile = lazy(() =>  import("./Pages/Dashboard/OrganizationProfile"));
+const ProductsList = lazy(() => import("./Pages/Products/ProductsList"));
+const CreateProduct = lazy(() => import("./Pages/Products/CreateProduct"));
+const EditProduct = lazy(() => import("./Pages/Products/EditProduct"));
+const BrandManagement = lazy(() => import("./Pages/Brands/BrandManagement"));
+const ManufacturerManagement = lazy(() => import("./Pages/Manufacturers/ManufacturerManagement"));
+const CategoryManagement = lazy(() => import("./Pages/Category/CategoryManagement"));
+const UnitOfMeasurement = lazy(() => import("./Pages/UnitOfMeasurement/UnitOfMeasurement"));
+const AttributeManagement = lazy(() => import("./Pages/Attributes/AttributeManagement"));
+const UserManagement = lazy(() => import("./Pages/Security/Users/UserManagement"));
+const ManageUserRoles = lazy(() => import("./Pages/Security/Roles/ManageUserRoles"));
+const InventoryWarehouseList = lazy(() => import("./Pages/Settings/Warehouse/InventoryWarehouseList"));
+const ShippingProvidersList = lazy(() => import("./Pages/Settings/ShippingProviders/ShippingProvidersList"));
+const VendorLoginCredentialsList = lazy(() => import("./Pages/Settings/VendorLoginCredentials/VendorLoginCredentialsList"));
+const PaymentTermsList = lazy(() => import("./Pages/Settings/PaymentTerms/PaymentTermsList"));
+const CountriesList = lazy(() => import("./Pages/Countries/CountriesList"));
+const CountryEditView = lazy(() => import("./Pages/Countries/CountryEditView"));
+const OrganizationProfile = lazy(() => import("./Pages/Dashboard/OrganizationProfile"));
 
-const ProtectedRoute = lazy(() =>  import("./Pages/ProtectedRoute"));
-const POKanbanList = lazy(() =>  import("./Pages/PurchaseOrder/POKanbanList"));
-const RootRedirect = lazy(() =>  import("./Pages/RootRedirect"));
-const VendorImportIndex = lazy(() =>  import("./Pages/Vendors/ImportExport/VendorImport"));
-const POImportHome = lazy(() =>  import("./Pages/PurchaseOrder/ImportExport/POImportHome"));
-const InvoiceList = lazy(() =>  import("./Pages/PurchaseOrder/Invoices/InvoiceList"));
-const InvoiceDetail = lazy(() =>  import("./Pages/PurchaseOrder/Invoices/InvoiceDetail"));
-const ShipmentsList = lazy(() =>  import("./Pages/PurchaseOrder/Shipments/ShipmentsList"));
+const ProtectedRoute = lazy(() => import("./Pages/ProtectedRoute"));
+const POKanbanList = lazy(() => import("./Pages/PurchaseOrder/POKanbanList"));
+const RootRedirect = lazy(() => import("./Pages/RootRedirect"));
+const VendorImportIndex = lazy(() => import("./Pages/Vendors/ImportExport/VendorImport"));
+const POImportHome = lazy(() => import("./Pages/PurchaseOrder/ImportExport/POImportHome"));
+const InvoiceList = lazy(() => import("./Pages/PurchaseOrder/Invoices/InvoiceList"));
+const InvoiceDetail = lazy(() => import("./Pages/PurchaseOrder/Invoices/InvoiceDetail"));
+const ShipmentsList = lazy(() => import("./Pages/PurchaseOrder/Shipments/ShipmentsList"));
+import Lottie from "lottie-react";
+import data from "./Assets/dist/img/sb_logo.json";
 
 const LoadingFallback = () => (
-  <div 
-    className="d-flex flex-column align-items-center justify-content-center" 
-    style={{ 
-      height: "100vh", 
+  <div
+    className="d-flex flex-column align-items-center justify-content-center"
+    style={{
+      height: "100vh",
       backgroundColor: "#f4f6f9", // AdminLTE light background
-      zIndex: 9999 
+      zIndex: 9999
     }}
   >
     {/* Pixabay Double Gear GIF */}
     <div className="mb-4 text-center">
-      <img 
-        src={ROCKET_LOADER}
-        alt="Loading Application..." 
-        style={{ 
-          width: '120px', 
-          height: '120px', 
-          objectFit: 'contain',
-          mixBlendMode: 'multiply' // வெள்ளை பின்னணியுடன் கலக்க (Background blending)
+      <Lottie
+        animationData={data}
+        loop={true}
+        style={{
+          width: "140px",
+          height: "140px"
         }}
       />
     </div>
 
     {/* Text Section */}
     <div className="text-center">
-      <h6 className="fw-bold text-dark mb-1" style={{ letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-         Loading
+      <h6 className="fw-medium text-dark mb-1" style={{ letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+        Loading..
       </h6>
       <p className="text-muted small mb-0">
         {/*Syncing records with the server
@@ -160,50 +160,50 @@ const MainLayout = ({ children }) => {
         </section>
       </div>
 
-      <Toaster 
+      <Toaster
         position="top-center"
-         gutter={12}
+        gutter={12}
         autoClose={2500}
         newestOnTop
         pauseOnHover
         draggable
         theme="colored"
         toastOptions={{
-        style: {
+          style: {
             padding: "16px 20px",  // inner spacing
             border: "2px solid #63e90a",
-        },
-        success: {
-          style: {
-            borderColor: "#22c55e", // green
           },
-          iconTheme: {
-            primary: "#22c55e",
-            secondary: "white",
+          success: {
+            style: {
+              borderColor: "#22c55e", // green
+            },
+            iconTheme: {
+              primary: "#22c55e",
+              secondary: "white",
+            },
           },
-        },
 
-        error: {
-          style: {
-            borderColor: "#ef4444", // red
+          error: {
+            style: {
+              borderColor: "#ef4444", // red
+            },
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "white",
+            },
           },
-          iconTheme: {
-            primary: "#ef4444",
-            secondary: "white",
-          },
-        },
 
-        loading: {
-          style: {
-            borderColor: "#3b82f6", // blue
+          loading: {
+            style: {
+              borderColor: "#3b82f6", // blue
+            },
           },
-        },
 
-        custom: {
-          style: {
-            borderColor: "#f59e0b", // orange
+          custom: {
+            style: {
+              borderColor: "#f59e0b", // orange
+            },
           },
-        },
         }}
 
       />
@@ -238,14 +238,14 @@ const routes = [
   { path: "/purchaseorder/invoices", component: <InvoiceList />, title: "SB Admin | Invoice List", layout: true, protected: true },
   { path: "/purchaseorder/purchaseorder/invoicedetails/:invoiceId?", component: <InvoiceDetail />, title: "SB Admin | InvoiceDetail", layout: true, protected: true },
   { path: "/purchaseorder/shipments", component: <ShipmentsList />, title: "SB Admin | Shipments List", layout: true, protected: true },
-  
+
   { path: "/purchaseorder/invoicedue", component: <PendingInvoiceList />, title: "SB Admin | Pending Invoice List", layout: true, protected: true },
-  
+
   //invoicedue
   //receive details
   //purchaseorder/receive/
   { path: "/purchaseorder/receive/:receiveId?", component: <PurchaseReceiveEdit />, title: "SB Admin | Purchase Receive", layout: true, protected: true },
-  
+
 
   //shipments
 
