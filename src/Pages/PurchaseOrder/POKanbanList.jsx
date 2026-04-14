@@ -147,7 +147,7 @@ const POKanbanList = () => {
         </div>
       </div>
 
-      <div className="d-flex gap-2 rounded-4 overflow-auto px-2" style={{ Height: "auto" }}>
+      <div className="d-flex gap-2 rounded-4 overflow-auto px-2" style={{ Height: "79vh", minHeight: "79vh" }}>
         {displayColumns.map((col) => (
           <KanbanColumn
             key={col.id}
