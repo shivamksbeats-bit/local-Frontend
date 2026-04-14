@@ -382,43 +382,8 @@ const AddNewVendor = () => {
     }, [navigate]);
 
     const handleTabSelect = useCallback((key) => {
-        const disabledTabs = ['warehouse', 'address', 'contacts', 'documents', 'purchases', 'returns', 'costings'];
-
-        if (disabledTabs.includes(key)) {
-            flushAndRun((latestData) => {
-                const missing = validateRequiredFields(latestData);
-
-                if (missing.length > 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Required Fields Missing',
-                        html: `<p class="mb-2" style="color: #555;">Please fill in the following required fields to access this section:</p>
-                               <div class="text-start" style="font-size: 14px; padding: 0 20px;">
-                                   ${missing.map(f => `<div style="color: #dc3545; font-weight: 600; padding: 4px 0; border-bottom: 1px solid #f0f0f0;">✗ &nbsp;${f}</div>`).join("")}
-                               </div>`,
-                    });
-                    return;
-                }
-
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Save Required',
-                    text: 'All required details are filled. Would you like to save the vendor and continue to this section?',
-                    showCancelButton: true,
-                    confirmButtonText: 'Save & Continue',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#0d6efd',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        performSave(latestData, key);
-                    }
-                });
-            });
-            return;
-        }
-
         setActiveTab(key);
-    }, [flushAndRun, validateRequiredFields, performSave]);
+    }, []);
 
     const handleCreate = useCallback(async (e) => {
         if (e) e.preventDefault();
@@ -677,8 +642,8 @@ const AddNewVendor = () => {
                                 </Row>
                             </Tab>
 
-                            {/* Warehouse Tab - Disabled */}
-                            <Tab eventKey="warehouse" title="Warehouses" tabClassName="vendor-tab">
+                            {/* Vendor Details Tab - Disabled */}
+                            <Tab eventKey="vendor_warehouse" title="Vendor Details" tabClassName="vendor-tab">
                                 <div className="py-0 px-2 pb-1">
                                     <Button variant="link" disabled={true} className="p-0 text-decoration-none mb-3 float-right small">
                                         <i className="fas fa-plus-circle me-1"></i> Add Location
@@ -700,8 +665,8 @@ const AddNewVendor = () => {
                                 </div>
                             </Tab>
 
-                            {/* Address Tab - Disabled */}
-                            <Tab eventKey="address" title="Address Details" tabClassName="vendor-tab">
+                            {/* Shopperbeats Address Details Tab - Disabled */}
+                            <Tab eventKey="address" title="Shopperbeats Address Details" tabClassName="vendor-tab">
                                 <div className="text-end mb-2">
                                     <Button variant="link" size="sm" className="text-decoration-none">
                                         <i className="fas fa-copy me-1"></i>Copy Billing to Shipping
@@ -713,8 +678,8 @@ const AddNewVendor = () => {
                                 </Row>
                             </Tab>
 
-                            {/* Contacts Tab - Disabled */}
-                            <Tab eventKey="contacts" title="Contact Details" tabClassName="vendor-tab">
+                            {/* Contact Details Tab - Disabled */}
+                            <Tab eventKey="contact" title="Contact Details" tabClassName="vendor-tab">
                                 <div className="py-0 px-2 pb-1">
                                     <Button variant="link" className="p-0 text-decoration-none mb-3 float-right small" disabled={true}>
                                         <i className="fas fa-plus-circle me-1"></i> Add Contact
@@ -733,7 +698,16 @@ const AddNewVendor = () => {
                                 </div>
                             </Tab>
 
-                            {/* Documents Tab - Disabled */}
+                            {/* Inventory Section Tab */}
+                            <Tab eventKey="inventory" title="Inventory Section" tabClassName="vendor-tab">
+                                <div className="p-4 text-center text-muted">
+                                    <i className="fas fa-boxes fa-3x mb-3 opacity-50"></i>
+                                    <h6 className="fw-bold">Inventory Section</h6>
+                                    <p className="mb-0">Create vendor first to add inventory configuration.</p>
+                                </div>
+                            </Tab>
+
+                            {/* Documents Tab */}
                             <Tab eventKey="documents" title="Documents" tabClassName="vendor-tab">
                                 <div className="p-1 pb-2">
                                     <Row className="mb-4 align-items-end">
@@ -765,23 +739,24 @@ const AddNewVendor = () => {
                                 </div>
                             </Tab>
 
-                            {/* Purchases Tab - Disabled */}
+                            {/* Purchases Tab */}
                             <Tab eventKey="purchases" title="Purchases" tabClassName="vendor-tab">
                                 <div className="ps-3 pe-3 pb-2">
                                     <VendorPOList vendorId={1} />
                                 </div>
                             </Tab>
 
-                            {/* Costings Tab - Disabled */}
-                            <Tab eventKey="costings" title="Invoices" tabClassName="vendor-disabled-tab">
+                            {/* Invoices Tab */}
+                            <Tab eventKey="invoices" title="Invoices" tabClassName="vendor-tab">
                                 <div className="p-4 text-center text-muted">
                                     <i className="fas fa-dollar-sign fa-3x mb-3 opacity-50"></i>
-                                    <h6 className="fw-bold">Vendor Invoices Locked</h6>
+                                    <h6 className="fw-bold">Invoices</h6>
+                                    <p className="mb-0">Create vendor first to view invoice history.</p>
                                 </div>
                             </Tab>
 
-                            {/* Returns Tab - Disabled */}
-                            <Tab eventKey="returns" title="Returns" tabClassName="vendor-disabled-tab">
+                            {/* Returns Tab */}
+                            <Tab eventKey="returns" title="Returns" tabClassName="vendor-tab">
                                 <div className="p-4 text-center text-muted">
                                     <i className="fas fa-undo-alt fa-3x mb-3 opacity-50"></i>
                                     <h6 className="fw-bold">Vendor Returns Locked</h6>

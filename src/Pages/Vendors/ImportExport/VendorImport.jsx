@@ -430,6 +430,7 @@ const VendorImportIndex = () => {
                                                     <th>Department</th>
                                                     <th>Email</th>
                                                     <th>Phone</th>
+                                                    <th>Mobile</th>
                                                     <th>Description</th>
                                                 </tr>
                                             ) : (
@@ -457,6 +458,7 @@ const VendorImportIndex = () => {
                                                         <td>{row["Department"] || "-"}</td>
                                                         <td>{row["Email"] || "-"}</td>
                                                         <td>{row["Phone"] || "-"}</td>
+                                                        <td>{row["Mobile"] || row["MOBILE"] || "-"}</td>
                                                         <td>{row["Description"] || "-"}</td>
                                                     </tr>
                                                 ) : (
